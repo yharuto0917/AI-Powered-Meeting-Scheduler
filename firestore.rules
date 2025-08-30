@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write meetings
+    match /meetings/{meetingId} {
+      // Anyone can read meeting data (for sharing meeting links)
+      allow read: if true;
+      
+      // Only authenticated users can create meetings
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.creatorUid;
+      
+      // Only the meeting creator can update the meeting
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.creatorUid;
+      
+      // Only the meeting creator can delete the meeting
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.creatorUid;
+      
+      // Availability subcollection rules
+      match /availabilities/{userId} {
+        // Anyone can read availabilities (for displaying the schedule grid)
+        allow read: if true;
+        
+        // Authenticated users can create their own availability
+        allow create: if request.auth != null;
+        
+        // Users can update their own availability, or meeting creator can update any
+        allow update: if request.auth != null && (
+          request.auth.uid == userId || 
+          request.auth.uid == get(/databases/$(database)/documents/meetings/$(meetingId)).data.creatorUid
+        );
+        
+        // Users can delete their own availability, or meeting creator can delete any
+        allow delete: if request.auth != null && (
+          request.auth.uid == userId || 
+          request.auth.uid == get(/databases/$(database)/documents/meetings/$(meetingId)).data.creatorUid
+        );
+      }
+    }
+    
+    // Deny all other document access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

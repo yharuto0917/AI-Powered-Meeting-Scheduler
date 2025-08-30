@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Point to the client directory for source files
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
 };
 
 export default nextConfig;
