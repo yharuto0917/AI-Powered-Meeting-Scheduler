@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { onAuthChange, sendAuthLink } from '@/lib/auth';
-import SchedulingGrid from '@/components/meeting/SchedulingGrid';
+import WeeklySchedulingTable from '@/components/meeting/WeeklySchedulingTable';
 import { User } from 'firebase/auth';
 
 export default function MeetingPage() {
@@ -41,7 +41,7 @@ export default function MeetingPage() {
       const result = await sendAuthLink(email);
       
       if (result.success) {
-        toast.success('Check your email for the sign-in link!');
+        toast.success(result.message);
         setEmail('');
       } else {
         toast.error(result.error || 'Failed to send sign-in link');
@@ -67,10 +67,10 @@ export default function MeetingPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Meeting Scheduler</h1>
+          <h1 className="text-3xl font-bold mb-2 text-black">Meeting Scheduler</h1>
           {!user && (
             <p className="text-muted-foreground">
-              Sign in to manage meetings or participate as a guest
+              会議を管理するためにサインインするか、ゲストとして参加してください
             </p>
           )}
         </div>
@@ -91,20 +91,25 @@ export default function MeetingPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                      ℹ️ Development mode: サインインのリンクはコンソール/ターミナルに表示されます
+                    </div>
+                  )}
                 </div>
                 <Button type="submit" disabled={authLoading} className="w-full">
                   {authLoading ? 'Sending...' : 'Send Sign-In Link'}
                 </Button>
               </form>
               <div className="text-center mt-4 text-sm text-muted-foreground">
-                You can also participate without signing in
+                アカウントを作成することなく参加することもできます
               </div>
             </CardContent>
           </Card>
         )}
 
         {/* Meeting Content */}
-        <SchedulingGrid 
+        <WeeklySchedulingTable 
           meetingId={meetingId} 
           isHost={user ? true : false} // For now, treat any authenticated user as potential host
         />

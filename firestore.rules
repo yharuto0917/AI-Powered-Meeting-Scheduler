@@ -6,9 +6,8 @@ service cloud.firestore {
       // Anyone can read meeting data (for sharing meeting links)
       allow read: if true;
       
-      // Only authenticated users can create meetings
-      allow create: if request.auth != null 
-        && request.auth.uid == request.resource.data.creatorUid;
+      // Allow creating meetings for both authenticated and anonymous users
+      allow create: if true;
       
       // Only the meeting creator can update the meeting
       allow update: if request.auth != null 

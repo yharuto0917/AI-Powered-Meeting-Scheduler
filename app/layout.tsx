@@ -28,6 +28,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <div className="polka-dots">
+          {Array.from({ length: 8 }, (_, i) => (
+            <div key={`polka-dot-${i}`} className="polka-dot"></div>
+          ))}
+        </div>
         {children}
         <Toaster />
       </body>

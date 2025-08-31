@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from 'sonner';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, Firestore } from 'firebase/firestore';
+import { db, connectToEmulators } from '@/lib/firebase';
 import { getCurrentUser } from '@/lib/auth';
 import { generateTimeSlots } from '@/lib/utils';
+import { logFirebaseConfig, checkEmulatorConnection } from '@/lib/firebase-debug';
 
 interface CreateMeetingFormProps {
   onSuccess?: (meetingId: string) => void;
@@ -33,23 +34,23 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
     e.preventDefault();
     
     if (!formData.title || !formData.startDate || !formData.endDate || !formData.deadline) {
-      toast.error('Please fill in all required fields');
+      toast.error('すべての必須フィールドを入力してください');
       return;
     }
 
     if (formData.startDate >= formData.endDate) {
-      toast.error('End date must be after start date');
+      toast.error('終了日は開始日より後にしてください');
       return;
     }
 
     if (formData.deadline <= new Date()) {
-      toast.error('Deadline must be in the future');
+      toast.error('回答期限は会議実施日の前にしてください');
       return;
     }
 
     // Validate that deadline is after start date
-    if (formData.deadline <= formData.startDate) {
-      toast.error('Deadline must be after the start date');
+    if (formData.deadline >= formData.startDate) {
+      toast.error('回答期限は開始日より後にしてください');
       return;
     }
 
@@ -81,18 +82,28 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
       };
 
       if (!db) {
-        toast.error('Firebase is not configured. Please set up your environment variables.');
+        console.error('Firestore database is not initialized');
+        toast.error('Firebaseが設定されていません。環境変数を設定してください。');
         return;
       }
+
+      // Ensure emulator connection
+      connectToEmulators();
       
+      // Debug Firebase configuration
+      logFirebaseConfig();
+      checkEmulatorConnection(db);
+      
+      console.log('Attempting to create document in Firestore...');
       const docRef = await addDoc(collection(db, 'meetings'), meetingData);
+      console.log('Document created successfully with ID:', docRef.id);
       
-      toast.success('Meeting created successfully!');
+      toast.success('会議が作成されました！');
       
       if (onSuccess) {
         onSuccess(docRef.id);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating meeting:', error);
       console.error('Error details:', {
         message: error.message,
@@ -102,13 +113,13 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
       
       // Provide more specific error messages
       if (error.code === 'permission-denied') {
-        toast.error('Permission denied. Please check your authentication.');
+        toast.error('パーミッションが拒否されました。認証を確認してください。');
       } else if (error.code === 'unavailable') {
-        toast.error('Service unavailable. Please check if Firebase emulators are running.');
-      } else if (error.message.includes('Firebase is not configured')) {
-        toast.error('Firebase configuration error. Please check your environment variables.');
+        toast.error('サービスが利用できません。Firebase emulatorsが実行されているか確認してください。');
+      } else if (error.message?.includes('Firebase is not configured')) {
+        toast.error('Firebaseの設定にエラーがあります。環境変数を確認してください。');
       } else {
-        toast.error(`Failed to create meeting: ${error.message}`);
+        toast.error(`会議の作成に失敗しました: ${error.message || '不明なエラー'}`);
       }
     } finally {
       setLoading(false);
@@ -118,35 +129,35 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Create New Meeting</CardTitle>
+        <CardTitle>新しい会議を作成</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Meeting Title *</Label>
+            <Label htmlFor="title">会議のタイトル *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter meeting title"
+              placeholder="会議のタイトルを入力してください"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">説明</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter meeting description (optional)"
+              placeholder="会議の説明を入力してください (任意)"
               rows={3}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Start Date *</Label>
+              <Label>開始日 *</Label>
               <Calendar
                 mode="single"
                 selected={formData.startDate}
@@ -157,7 +168,7 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
             </div>
             
             <div className="space-y-2">
-              <Label>End Date *</Label>
+              <Label>終了日 *</Label>
               <Calendar
                 mode="single"
                 selected={formData.endDate}
@@ -174,7 +185,7 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startTime">Start Time</Label>
+              <Label htmlFor="startTime">開始時間</Label>
               <Input
                 id="startTime"
                 type="time"
@@ -184,7 +195,7 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="endTime">End Time</Label>
+              <Label htmlFor="endTime">終了時間</Label>
               <Input
                 id="endTime"
                 type="time"
@@ -195,7 +206,7 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
           </div>
 
           <div className="space-y-2">
-            <Label>Response Deadline *</Label>
+            <Label>回答期限 *</Label>
             <Calendar
               mode="single"
               selected={formData.deadline}
@@ -206,7 +217,7 @@ export default function CreateMeetingForm({ onSuccess }: CreateMeetingFormProps)
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Creating...' : 'Create Meeting'}
+            {loading ? '作成しています...' : '会議を作成'}
           </Button>
         </form>
       </CardContent>

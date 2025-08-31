@@ -62,7 +62,7 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
     
     if (!db) {
       setLoading(false);
-      toast.error('Firebase is not configured. Please set up your environment variables.');
+      toast.error('Firebaseが設定されていません。環境変数を設定してください。');
       return;
     }
 
@@ -125,16 +125,16 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
   const saveAvailability = async () => {
     if (!user || !userName.trim()) {
       if (!user) {
-        toast.error('Please sign in to save availability');
+        toast.error('Availabilityを保存するにはサインインしてください');
         return;
       }
-      toast.error('Please enter your name');
+      toast.error('参加者の名前を入力してください');
       return;
     }
 
     try {
       if (!db) {
-        toast.error('Firebase is not configured. Please set up your environment variables.');
+        toast.error('Firebaseが設定されていません。環境変数を設定してください。');
         return;
       }
       
@@ -143,10 +143,10 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
         schedule: userAvailability,
         updatedAt: new Date(),
       });
-      toast.success('Availability saved successfully!');
+      toast.success('Availabilityが保存されました。');
     } catch (error) {
-      console.error('Error saving availability:', error);
-      toast.error('Failed to save availability');
+      console.error('Availabilityが保存に失敗しました:', error);
+      toast.error('Availabilityが保存に失敗しました。');
     }
   };
 
@@ -162,13 +162,13 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
       });
       
       if (response.ok) {
-        toast.success('AI suggestion completed!');
+        toast.success('AI Suggestionが完了しました。');
       } else {
-        toast.error('AI suggestion failed');
+        toast.error('AI Suggestionが失敗しました。');
       }
     } catch (error) {
-      console.error('Error running AI suggestion:', error);
-      toast.error('Failed to run AI suggestion');
+      console.error('AI Suggestionが実行に失敗しました:', error);
+      toast.error('AI Suggestionが実行に失敗しました');
     } finally {
       setAiLoading(false);
     }
@@ -197,25 +197,25 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return <div className="flex justify-center items-center h-64">読み込んでいます...</div>;
   }
 
   if (!meeting) {
-    return <div className="text-center">Meeting not found</div>;
+    return <div className="text-center">会議が見つかりません</div>;
   }
 
   if (meeting.status === 'confirmed' && meeting.confirmedDateTime) {
     return (
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-green-600">Meeting Confirmed!</CardTitle>
+          <CardTitle className="text-green-600">会議が確定しました！</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p><strong>Meeting:</strong> {meeting.title}</p>
-            <p><strong>Date & Time:</strong> {formatTimeSlot(meeting.confirmedDateTime)}</p>
+            <p><strong>会議:</strong> {meeting.title}</p>
+            <p><strong>日時:</strong> {formatTimeSlot(meeting.confirmedDateTime)}</p>
             {meeting.confirmedReason && (
-              <p><strong>AI Decision Reason:</strong> {meeting.confirmedReason}</p>
+              <p><strong>AIの決定理由:</strong> {meeting.confirmedReason}</p>
             )}
           </div>
         </CardContent>
@@ -232,8 +232,8 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
           <CardTitle>{meeting.title}</CardTitle>
           <p className="text-muted-foreground">{meeting.description}</p>
           <div className="flex items-center gap-4 text-sm">
-            <span>Deadline: {meeting.deadline.toLocaleDateString('ja-JP')}</span>
-            <span>Participants: {participants.length}</span>
+            <span>回答期限: {meeting.deadline.toLocaleDateString('ja-JP')}</span>
+            <span>参加者: {participants.length}</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -241,12 +241,12 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
             <div className="mb-4 p-4 border rounded-lg">
               <div className="space-y-2">
                 <Input
-                  placeholder="Enter your name to participate"
+                  placeholder="参加者の名前を入力してください"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                 />
                 <Button onClick={saveAvailability}>
-                  Participate in Meeting
+                  会議に参加
                 </Button>
               </div>
             </div>
@@ -255,18 +255,18 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
           {user && (
             <div className="mb-4 space-y-2">
               <Input
-                placeholder="Your name"
+                placeholder="参加者の名前"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
               />
-              <Button onClick={saveAvailability}>Save Availability</Button>
+              <Button onClick={saveAvailability}>Availabilityを保存</Button>
               {isHost && (
                 <Button 
                   onClick={runAISuggestion} 
                   disabled={aiLoading}
                   variant="outline"
                 >
-                  {aiLoading ? 'Running AI Suggestion...' : 'Run AI Suggestion'}
+                  {aiLoading ? 'AI Suggestionを実行しています...' : 'AI Suggestionを実行'}
                 </Button>
               )}
             </div>
@@ -316,16 +316,16 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Comment</DialogTitle>
+                                  <DialogTitle>コメント</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-2">
                                   <Textarea
                                     value={userAvailability[timeSlotKey]?.comment || ''}
                                     onChange={(e) => handleCommentChange(timeSlotKey, e.target.value)}
-                                    placeholder="Add a comment..."
+                                    placeholder="コメントを入力してください..."
                                   />
                                   <Button onClick={() => {}}>
-                                    Save Comment
+                                    コメントを保存
                                   </Button>
                                 </div>
                               </DialogContent>
@@ -354,7 +354,7 @@ export default function SchedulingGrid({ meetingId, isHost = false }: Scheduling
 
           {participants.length > 0 && (
             <div className="mt-8">
-              <h3 className="font-semibold mb-3">Participants</h3>
+              <h3 className="font-semibold mb-3">参加者</h3>
               <div className="space-y-2">
                 {participants.map((participant) => (
                   <Badge key={participant.userId} variant="secondary">

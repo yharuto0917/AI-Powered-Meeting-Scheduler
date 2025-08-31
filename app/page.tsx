@@ -18,26 +18,26 @@ export default function Home() {
     <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Meeting Scheduler</h1>
+          <h1 className="text-4xl font-bold mb-4 text-black">Meeting Scheduler</h1>
           <p className="text-muted-foreground text-lg">
-            AI-powered meeting scheduling with Gemini and Firebase
+            AI-powered meeting scheduling with Gemini
           </p>
         </div>
 
         {!showCreateForm ? (
-          <Card className="w-full max-w-md mx-auto">
+          <Card className="w-full max-w-md mx-auto glass-morphism-card">
             <CardHeader>
-              <CardTitle>Get Started</CardTitle>
+              <CardTitle className="text-center">Get Started</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button 
                 onClick={() => setShowCreateForm(true)}
                 className="w-full"
               >
-                Create New Meeting
+                新しい会議を作成
               </Button>
               <div className="text-center text-sm text-muted-foreground">
-                or share a meeting link with participants
+                または、会議のリンクを共有して参加者と連携してください
               </div>
             </CardContent>
           </Card>
@@ -46,37 +46,37 @@ export default function Home() {
         )}
 
         <div className="mt-12 text-center">
-          <h2 className="text-2xl font-semibold mb-4">Features</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-black">Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
+            <Card className="glass-morphism-card">
               <CardHeader>
                 <CardTitle className="text-lg">AI-Powered Scheduling</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Gemini AI analyzes all participants&apos; availability to suggest the best meeting times
+                  Gemini AIはすべての参加者のAvailabilityを分析して、最適な会議時間を提案します
                 </p>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="glass-morphism-card">
               <CardHeader>
-                <CardTitle className="text-lg">Google Calendar Integration</CardTitle>
+                <CardTitle className="text-lg">Google Calendar built-in</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Import your existing schedule to automatically block unavailable times
+                  Googleカレンダーから既存の予定をインポートして、利用不可な時間を自動的にブロックします
                 </p>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="glass-morphism-card">
               <CardHeader>
                 <CardTitle className="text-lg">Easy Sharing</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Share meeting links with participants - no account required to participate
+                  会議のリンクを共有するだけ。<br />簡単に参加者を会議調整へ招待できます。
                 </p>
               </CardContent>
             </Card>
