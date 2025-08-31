@@ -58,8 +58,8 @@ export default function ManageMeetingPage() {
     setUser(currentUser);
     
     if (!currentUser) {
-      console.warn('No current user found');
-      toast.error('Please sign in to manage meetings');
+      console.warn('現在のユーザーが見つかりません');
+      toast.error('会議を管理するにはサインインしてください');
       router.push(`/meeting/${meetingId}`);
       return;
     }
@@ -79,14 +79,14 @@ export default function ManageMeetingPage() {
       
       if (!dbInstance) {
         console.error('Firebase database instance is null');
-        toast.error('Firebase is not configured. Please set up your environment variables.');
+        toast.error('Firebaseが設定されていません。環境変数を設定してください。');
         router.push('/');
         return;
       }
       // Load meeting data
       const meetingDoc = await getDoc(doc(dbInstance, 'meetings', meetingId));
       if (!meetingDoc.exists()) {
-        toast.error('Meeting not found');
+        toast.error('会議が見つかりません');
         router.push('/');
         return;
       }
@@ -115,7 +115,7 @@ export default function ManageMeetingPage() {
 
       // Check if user is the creator
       if (user && meetingData.creatorUid !== user.uid) {
-        toast.error('You are not authorized to manage this meeting');
+        toast.error('この会議を管理する権限がありません');
         router.push(`/meeting/${meetingId}`);
         return;
       }
@@ -139,8 +139,8 @@ export default function ManageMeetingPage() {
       setAnalysis(timeSlotAnalysis);
 
     } catch (error: any) {
-      console.error('Error loading meeting data:', error);
-      console.error('Error details:', {
+      console.error('会議データを読み込めませんでした:', error);
+      console.error('エラー詳細:', {
         message: error.message,
         code: error.code,
         stack: error.stack,
@@ -148,15 +148,15 @@ export default function ManageMeetingPage() {
       });
       
       // Provide specific error messages
-      let errorMessage = 'Failed to load meeting data';
+      let errorMessage = '会議データを読み込めませんでした';
       if (error.code === 'permission-denied') {
-        errorMessage = 'Permission denied. Please check authentication.';
+        errorMessage = 'パーミッションが拒否されました。認証を確認してください。';
       } else if (error.code === 'unavailable') {
-        errorMessage = 'Service unavailable. Please check if Firebase emulators are running.';
+        errorMessage = 'サービスが利用できません。Firebase emulatorsが実行されているか確認してください。';
       } else if (error.message?.includes('Firebase is not configured')) {
-        errorMessage = 'Firebase configuration error. Please check environment variables.';
+        errorMessage = 'Firebaseの設定にエラーがあります。環境変数を確認してください。';
       } else if (error.message) {
-        errorMessage = `Failed to load meeting data: ${error.message}`;
+        errorMessage = `会議データを読み込めませんでした: ${error.message}`;
       }
       
       toast.error(errorMessage);
@@ -242,37 +242,37 @@ export default function ManageMeetingPage() {
     try {
       // Find the best time slot based on analysis
       if (analysis.length === 0) {
-        toast.error('No data available for AI analysis. Please make sure participants have submitted their availability.');
-        console.error('Analysis array is empty');
+        toast.error('AI分析に利用可能なデータがありません。参加者が回答しているか確認してください。');
+        console.error('分析配列が空です');
         return;
       }
       
       if (participants.length === 0) {
-        toast.error('No participants have responded yet. Please share the meeting link to collect availability.');
+        toast.error('参加者が回答していません。会議のリンクを共有して参加者と連携してください。');
         return;
       }
 
       const bestSlot = analysis[0];
       
       // Validate bestSlot data
-      console.log('Best slot selected:', bestSlot);
-      console.log('Analysis data:', analysis);
+      console.log('最適な時間スロットが選択されました:', bestSlot);
+      console.log('分析データ:', analysis);
       
       if (!bestSlot) {
-        toast.error('No time slot available for AI analysis');
-        console.error('bestSlot is null/undefined');
+        toast.error('AI分析に利用可能な時間スロットがありません');
+        console.error('bestSlotがnull/undefinedです');
         return;
       }
       
       if (!bestSlot.dateTime) {
-        toast.error('Invalid time slot data - no dateTime');
-        console.error('bestSlot.dateTime is missing:', bestSlot);
+        toast.error('無効な時間スロットデータ - dateTimeがありません');
+        console.error('bestSlot.dateTimeがありません:', bestSlot);
         return;
       }
 
       const reason = generateAIReason(bestSlot, analysis);
 
-      console.log('Updating meeting with:', {
+      console.log('会議を更新しています:', {
         status: 'confirmed',
         confirmedDateTime: bestSlot.dateTime,
         confirmedReason: reason
@@ -281,7 +281,7 @@ export default function ManageMeetingPage() {
       // Update meeting with AI decision
       const dbInstance = (firebaseClient.db as unknown as Firestore | null);
       if (!dbInstance) {
-        toast.error('Firebase is not configured. Please set up your environment variables.');
+        toast.error('Firebaseが設定されていません。環境変数を設定してください。');
         return;
       }
       await updateDoc(doc(dbInstance, 'meetings', meetingId), {
@@ -291,12 +291,12 @@ export default function ManageMeetingPage() {
         updatedAt: serverTimestamp()
       });
 
-      toast.success('AI has selected the optimal meeting time!');
+      toast.success('AIが最適な会議時間を選択しました！');
       await loadMeetingData(); // Reload data
 
     } catch (error) {
-      console.error('Error running AI suggestion:', error);
-      toast.error('Failed to run AI analysis');
+      console.error('AI分析を実行できませんでした:', error);
+      toast.error('AI分析を実行できませんでした');
     } finally {
       setAiLoading(false);
     }
@@ -305,27 +305,27 @@ export default function ManageMeetingPage() {
   const generateAIReason = (bestSlot: TimeSlotAnalysis, allSlots: TimeSlotAnalysis[]): string => {
     const { availableCount, maybeCount, totalParticipants, score } = bestSlot;
     
-    let reason = `AI Analysis: This time slot has the highest compatibility score (${score.toFixed(1)}%). `;
+    let reason = `AI Analysis: この時間スロットは最高の互換性スコア (${score.toFixed(1)}%) を持っています。`;
     
     if (availableCount === totalParticipants) {
-      reason += `All ${totalParticipants} participants marked this time as available. `;
+      reason += `すべての${totalParticipants}人の参加者がこの時間を利用可能と回答しました。`;
     } else if (availableCount > totalParticipants / 2) {
-      reason += `${availableCount} out of ${totalParticipants} participants are available, `;
+      reason += `${availableCount}人の${totalParticipants}人の参加者が利用可能と回答しました。`;
       if (maybeCount > 0) {
-        reason += `with ${maybeCount} additional participants marking it as 'maybe'. `;
+        reason += `${maybeCount}人がわからないと回答しました。`;
       }
     } else {
-      reason += `While only ${availableCount} participants are definitely available, `;
+      reason += `一方で、${availableCount}人の${totalParticipants}人の参加者が利用可能と回答しました。`;
       if (maybeCount > 0) {
-        reason += `${maybeCount} more marked it as 'maybe', `;
+        reason += `${maybeCount}人がわからないと回答しました。`;
       }
-      reason += `making it the best compromise among all options. `;
+      reason += `すべてのオプションの中で最適な妥協点となりました。`;
     }
 
     const alternativeSlots = allSlots.slice(1, 3).filter(slot => slot.score > 20);
     if (alternativeSlots.length > 0) {
       const alternativeTimes = alternativeSlots.map(s => new Date(s.dateTime).toLocaleString());
-      reason += `Alternative times considered include ${alternativeTimes.join(' and ')}.`;
+      reason += `考慮された代替時間は${alternativeTimes.join(' and ')}です。`;
     }
 
     return reason;
@@ -335,12 +335,12 @@ export default function ManageMeetingPage() {
     try {
       // Validate time slot data
       if (!timeSlotAnalysis || !timeSlotAnalysis.dateTime) {
-        toast.error('Invalid time slot data');
-        console.error('Invalid timeSlotAnalysis:', timeSlotAnalysis);
+        toast.error('無効な時間スロットデータ');
+        console.error('無効な時間スロットデータ:', timeSlotAnalysis);
         return;
       }
 
-      const reason = `Manually selected by meeting organizer. ${timeSlotAnalysis.availableCount} participants available, ${timeSlotAnalysis.maybeCount} maybe available.`;
+      const reason = `手動で選択されました。${timeSlotAnalysis.availableCount}人が利用可能、${timeSlotAnalysis.maybeCount}人がわからない。`;
 
       console.log('Manually updating meeting with:', {
         status: 'confirmed',
@@ -350,7 +350,7 @@ export default function ManageMeetingPage() {
 
       const dbInstance = (firebaseClient.db as unknown as Firestore | null);
       if (!dbInstance) {
-        toast.error('Firebase is not configured. Please set up your environment variables.');
+        toast.error('Firebaseが設定されていません。環境変数を設定してください。');
         return;
       }
       await updateDoc(doc(dbInstance, 'meetings', meetingId), {
@@ -360,11 +360,11 @@ export default function ManageMeetingPage() {
         updatedAt: serverTimestamp()
       });
 
-      toast.success('Meeting time confirmed!');
+      toast.success('会議の時間を確定しました');
       await loadMeetingData();
     } catch (error) {
       console.error('Error confirming time:', error);
-      toast.error('Failed to confirm meeting time');
+      toast.error('会議の時間を確定できませんでした');
     }
   };
 

@@ -412,7 +412,7 @@ export default function WeeklySchedulingTable({ meetingId, isHost = false }: Wee
                     {dates.map(dateKey => {
                       const slot = timeRow.slots.find(s => s.dateKey === dateKey);
                       if (!slot || !slot.timeSlotKey) {
-                        return <TableCell key={`${timeRow.timeKey}-${dateKey}`} className="text-center text-gray-300">-</TableCell>;
+                        return <TableCell key={`${timeRow.timeKey}-${dateKey}`} className="text-center text-black">-</TableCell>;
                       }
 
                       const timeSlotKey = slot.timeSlotKey;
@@ -446,15 +446,15 @@ export default function WeeklySchedulingTable({ meetingId, isHost = false }: Wee
                             </div>
                             
                             <div className="flex justify-center gap-1">
-                              <Badge variant="outline" className="text-xs px-1">
+                              <Badge variant="outline" className="text-xs px-1 text-black">
                                 <CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />
                                 {counts.available}
                               </Badge>
-                              <Badge variant="outline" className="text-xs px-1">
+                              <Badge variant="outline" className="text-xs px-1 text-black">
                                 <AlertTriangle className="w-3 h-3 mr-1 text-yellow-600" />
                                 {counts.maybe}
                               </Badge>
-                              <Badge variant="outline" className="text-xs px-1">
+                              <Badge variant="outline" className="text-xs px-1 text-black">
                                 <XCircle className="w-3 h-3 mr-1 text-red-600" />
                                 {counts.unavailable}
                               </Badge>
@@ -470,7 +470,7 @@ export default function WeeklySchedulingTable({ meetingId, isHost = false }: Wee
           </div>
 
           <div className="mt-6 flex justify-between items-center">
-            <Button onClick={saveAvailability} className="glass-morphism-button">
+            <Button onClick={saveAvailability} >
               Availabilityを保存
             </Button>
             
